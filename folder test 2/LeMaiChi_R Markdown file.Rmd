@@ -1,0 +1,58 @@
+---
+title: "The basic R Markdown"
+author: "Chi"
+date: "1/25/2026"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Data description
+* Variable 1: rank - a factor with levels AssocProf, AsstProf, Prof.
+* Variable 2: discipline - a factor with levels A (“theoretical” departments) or B (“applied” departments).
+* Variable 3: yrs.since.phd - years since PhD.
+* Variable 4: yrs.service - years of service.
+* Variable 5: sex - a factor with levels Female and Male.
+* Variable 6: salary - nine-month salary, in dollars.
+
+The 2008-09 nine-month academic salary for Assistant Professors, Associate Professors and Pro
+fessors in a college in the U.S. The data were collected as part of the on-going effort of the college’s
+administration to monitor salary differences between male and female faculty members.
+
+# Data wrangling
+The data used is salaries.csv.
+
+* Step1: Load the packages
+* Step2: Set the working directory 
+* Step3: Read csv file into R
+* Step4: Use select(), filter(), group_by(), count() in this part and combine them with pipe operator
+* Step5: Reshape the table from long to wide: using spread() 
+* Step6: Reshape the table from wide to long: using gather() 
+
+```{r data-wrangling, echo=TRUE, message=FALSE, warning=FALSE, results="hide"}
+# Load the packages
+library(tidyverse)
+# Set the working directory
+setwd("/home/rstudio/Module3/")
+
+# Read csv file into R
+salaries <- read_csv("Salaries.csv")
+
+# Use select(), filter(), group_by(), count() in this part and combine them with pipe operator
+salaries_new <- salaries %>%
+  select(rank,discipline,sex,salary) %>%      #Select columns of “rank”, “discipline”, “sex”, “salary”.
+  filter(!is.na(salary)) %>%                  #Filter the rows where “salary” is not missing value.
+  group_by(rank,discipline,sex) %>%           #Group based on the required columns (“rank”,”discipline”, “sex”) 
+  count(name="n")                             #tally count of the rows
+
+# Reshape the table from long to wide: using spread()
+wide <- salaries_new %>%
+  spread(key=sex, value=n, fill=FALSE)
+
+# Reshape the table from wide to long: using gather()
+long <- wide %>%
+  gather(key=sex, value=n, Female, Male, na.rm=TRUE)
+
+```
